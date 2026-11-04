@@ -41,7 +41,7 @@ METHODS = ["PD_SCALING", "RIDGE", "RF", "ET", "KNN", "MLP", "XGB", "LGBM", "CAT"
            "AVG", "BLEND", "KNORA_E", "KNORA_U", "STACK"]
 LABEL = {"PD_SCALING": "Pd scaling", "RIDGE": "Ridge", "KNORA_E": "KNORA-E", "KNORA_U": "KNORA-U",
          "LGBM": "LightGBM", "CAT": "CatBoost", "XGB": "XGBoost", "STACK": "Stacking",
-         "AVG": "Average", "BLEND": "Blending"}
+         "AVG": "Average", "BLEND": "Blending", "LGBM_P": "LGBM-P", "LGBM_F": "LGBM-F"}
 OUT = os.path.join(ROOT, "results", "paper")
 N_BOOT = 1000
 
@@ -190,28 +190,36 @@ Q05 = {2: 1.960, 3: 2.343, 4: 2.569, 5: 2.728, 6: 2.850, 7: 2.949, 8: 3.031, 9: 
 
 
 def cd_diagram(avg_ranks, cd, n_sets):
-    names = list(avg_ranks.index)
-    k = len(names)
-    fig, ax = plt.subplots(figsize=(140 * MM, 45 * MM))
-    ax.set_xlim(1, k)
-    ax.set_ylim(0, 1)
-    ax.invert_xaxis()
+    """Demsar (2006) tarzi kritik fark diyagrami. En iyi siralar sagda; etiketler eksenin
+    disinda, cizgiler etiketlere degmeden biter."""
+    order = avg_ranks.sort_values()                    # en iyi (kucuk sira) once
+    k = len(order)
+    half = (k + 1) // 2
+    right, left = list(order.items())[:half], list(order.items())[half:][::-1]
+    n_rows = max(len(right), len(left))
+    fig, ax = plt.subplots(figsize=(140 * MM, (28 + 5.5 * n_rows) * MM))
+    y_axis, dy = 0.0, 1.0
+    ax.set_xlim(k + 0.5 + 3.2, 1 - 0.5 - 3.2)          # ters eksen; iki yanda etiket payi
+    ax.set_ylim(-(n_rows + 0.8) * dy, 3.1)
     ax.axis("off")
-    ax.hlines(0.85, 1, k, color="k", lw=0.8)
+    ax.hlines(y_axis, k, 1, color="k", lw=0.8)
     for r in range(1, k + 1):
-        ax.vlines(r, 0.83, 0.87, color="k", lw=0.6)
-        ax.text(r, 0.92, str(r), ha="center", fontsize=7)
-    order = avg_ranks.sort_values()
-    for i, (n, r) in enumerate(order.items()):
-        left = i < k / 2
-        y = 0.75 - (i if left else k - 1 - i) * 0.09
-        x_text = 0.8 if left else k + 0.2
-        ax.plot([r, r, x_text], [0.85, y, y], color="k", lw=0.6)
-        ax.text(x_text - 0.05 if left else x_text + 0.05, y, f"{lab(n)} ({r:.2f})",
-                ha="right" if left else "left", va="center", fontsize=7)
-    ax.plot([1, 1 + cd], [0.98, 0.98], color=OKABE[6], lw=1.5)
-    ax.text(1 + cd / 2, 1.0, f"CD = {cd:.2f}", ha="center", fontsize=7, color=OKABE[6])
-    ax.set_title(f"Average ranks over {n_sets} evaluation sets (lower is better)", fontsize=8, y=1.05)
+        ax.vlines(r, y_axis, y_axis + 0.25, color="k", lw=0.6)
+        ax.text(r, y_axis + 0.45, str(r), ha="center", va="bottom", fontsize=7)
+    for i, (n, r) in enumerate(right):                 # en iyiler: saga
+        y = -(i + 1) * dy
+        ax.plot([r, r, 1 - 0.3], [y_axis, y, y], color="k", lw=0.6)
+        ax.text(1 - 0.4, y, f"{lab(n)} ({r:.2f})", ha="left", va="center", fontsize=7)
+    for i, (n, r) in enumerate(left):                  # en kotuler: sola
+        y = -(i + 1) * dy
+        ax.plot([r, r, k + 0.3], [y_axis, y, y], color="k", lw=0.6)
+        ax.text(k + 0.4, y, f"{lab(n)} ({r:.2f})", ha="right", va="center", fontsize=7)
+    best = order.iloc[0]
+    ax.plot([best, best + cd], [1.35, 1.35], color=OKABE[6], lw=1.6)
+    ax.vlines([best, best + cd], 1.2, 1.5, color=OKABE[6], lw=1.0)
+    ax.text(best + cd / 2, 1.6, f"CD = {cd:.2f}", ha="center", va="bottom", fontsize=7, color=OKABE[6])
+    ax.text((k + 1) / 2, 3.05, f"Average ranks over {n_sets} evaluation sets (lower is better)",
+            ha="center", va="top", fontsize=8)
     return fig
 
 
@@ -433,7 +441,8 @@ def main():
     corr_p = os.path.join(ROOT, "results", MAIN, "error_correlation_dev.csv")
     if os.path.exists(corr_p):
         C = pd.read_csv(corr_p, index_col=0)
-        fig, axes = plt.subplots(1, 2, figsize=(190 * MM, 70 * MM), gridspec_kw={"width_ratios": [1.3, 1]})
+        fig, axes = plt.subplots(1, 2, figsize=(190 * MM, 72 * MM),
+                                 gridspec_kw={"width_ratios": [1.3, 1], "wspace": 0.55})
         im = axes[0].imshow(C.values, cmap="cividis", vmin=0.6, vmax=1.0)
         names = [lab(c) for c in C.columns]
         axes[0].set_xticks(range(len(names)), names, rotation=45, ha="right")
@@ -442,7 +451,8 @@ def main():
             for j in range(len(names)):
                 axes[0].text(j, i, f"{C.values[i, j]:.2f}", ha="center", va="center", fontsize=5.5,
                              color="k" if C.values[i, j] > 0.85 else "w")
-        fig.colorbar(im, ax=axes[0], shrink=0.8, label="Error correlation (validation)")
+        cb = fig.colorbar(im, ax=axes[0], shrink=0.8, pad=0.03)
+        cb.set_label("Error correlation (validation)", labelpad=4)
         b = joblib.load(os.path.join(ROOT, "results", MAIN, "models.joblib"))
         w = pd.Series(b["models"]["STACK_META"].coef_, index=b["stack_names"])
         axes[1].barh([lab(n) for n in w.index], w.values, color=OKABE[5])
