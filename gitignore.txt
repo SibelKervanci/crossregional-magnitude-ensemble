@@ -1,0 +1,17 @@
+# Data and results (large files; KOERI data are not redistributed)
+DataBase/
+KOERI/
+*.hdf5
+*.mseed
+*.csv.gz
+*.joblib
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Library and working artefacts
+catboost_info/
+*.log
+.spyproject/
