@@ -68,7 +68,7 @@ Recommended order: `run_experiments.py --set core`, then `--set nosp`, then `tun
 | Script | Purpose |
 |---|---|
 | `evaluate_turkey.py` | Zero-shot evaluation in Türkiye, including routed predictions, magnitude bins, SNR bands and few-shot offset calibration |
-| `evaluate_routed_tests.py` | Routed evaluation of the in-region and cross-dataset test sets |
+| `evaluate_routed_test.py` | Routed evaluation of the in-region and cross-dataset test sets |
 | `analyze_missing_s.py` | Errors and bias for records with and without an S arrival |
 | `make_results.py` | Main tables, paired tests, Friedman–Nemenyi analysis and all figures of the manuscript |
 | `shap_analysis.py` | SHAP feature importance and its transferability across regions |
