@@ -1,6 +1,6 @@
 """
 Veri seti indirme ve ilk inceleme scripti
-Hedef: Ensemble tabanli deprem buyuklugu tahmini (Computers & Geosciences)
+Target: ensemble-based earthquake magnitude estimation (Earth Science Informatics)
 
 Kurulum:
     pip install seisbench huggingface_hub pandas
