@@ -2,7 +2,7 @@
 
 Code accompanying the manuscript
 
-> Kervancı, İ.S., Tezel, İ. *Cross-benchmark leakage and cross-regional generalization in machine-learning earthquake magnitude estimation: a harmonized multi-dataset workflow with external validation in Türkiye.* Submitted to *Computers & Geosciences*.
+> Kervancı, İ.S., Tezel, İ. *Cross-benchmark leakage and cross-regional generalization in machine-learning earthquake magnitude estimation: a harmonized multi-dataset workflow with external validation in Türkiye.* Submitted to *Earth Science Informatics*.
 
 The workflow harmonizes three open seismic waveform benchmarks (STEAD, INSTANCE, CEED) in physical units, audits them for shared events, extracts 32 physically motivated features, trains individual learners and ensembles (averaging, blending, stacking, KNORA-E/U), handles network-specific S-phase availability with pattern submodels, and evaluates the models within each benchmark, across benchmarks and, without adaptation, on manually picked records of the Kandilli Observatory (KOERI) from south-eastern Türkiye.
 
